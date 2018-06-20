@@ -243,11 +243,12 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap,
     # Create a blank image to draw on.
     line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
     # Draw lines
-    draw_lines(line_img, lines, log=log)
+    draw_lines(line_img, lines, drawAllLines=True, log=log)
     return line_img
 
 
-def draw_lines(img, lines, color=[255, 0, 0], thickness=2, log=None):
+def draw_lines(img, lines, drawAllLines=False, color=[255, 0, 0], thickness=2,
+               log=None):
     """
     NOTE: this is the function you might want to use as a starting point once
     you want to average/extrapolate the line segments you detect to map out
@@ -268,79 +269,81 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2, log=None):
     Args:
         img (image): Draw lines on this image
         lines (array of lines as pairs of integer coords): Draw these lines
+        drawAllLines (bool): Draw all line segments or attempt to average?
         color (RGB array of ints): Draw lines using this color.
         thickness (int): Draw lines using this thickness
 
     Returns:
         None
     """
-    epsilon = 0.9  # Threshold to test for valid slope.
+    if drawAllLines:
+        for line in lines:
+            for x1, y1, x2, y2 in line:
+                cv2.line(img, (x1, y1), (x2, y2), color, thickness)
+    else:
+        epsilon = 0.9  # Threshold to test for valid slope.
 
-    # Calculate the average slope and center point for each line segment.
-    # Then use the slope-intercept line formula to generate end points for
-    # a straight line through the average center with the average slope.
-    # This will not work at all well for curves but is adequate for relatively
-    # straight lane lines.
+        # Calculate the average slope and center point for each line segment.
+        # Then use the slope-intercept line formula to generate end points for
+        # a straight line through the average center with the average slope.
+        # This will not work at all well for curves but is adequate for
+        # relatively straight lane lines.
 
-    # Calculate slope and center for each line segment. Use the slope to
-    # separate lines into left and right.
-    lm = []
-    rm = []
-    lc = []
-    rc = []
-    for line in lines:
-        for x1, y1, x2, y2 in line:
-            m = ((y2 - y1) / (x2 - x1))  # dy / dx
-            c = [(x2 + x1) / 2, (y2 + y1) / 2]
-            if log:
-                log.debug('slope: {0}'.format(m))
-            if -epsilon < m and m < 0.:
-                lm.append(m)
-                lc.append(c)
-            elif 0. < m and m < epsilon:
-                rm.append(m)
-                rc.append(c)
+        # Calculate slope and center for each line segment. Use the slope to
+        # separate lines into left and right.
+        lm = []
+        rm = []
+        lc = []
+        rc = []
+        for line in lines:
+            for x1, y1, x2, y2 in line:
+                m = ((y2 - y1) / (x2 - x1))  # dy / dx
+                c = [(x2 + x1) / 2, (y2 + y1) / 2]
+                if log:
+                    log.debug('slope: {0}'.format(m))
+                if -epsilon < m and m < 0.:
+                    lm.append(m)
+                    lc.append(c)
+                elif 0. < m and m < epsilon:
+                    rm.append(m)
+                    rc.append(c)
 
-    # Take the average slope and average center so we have single slope and
-    # center values for left and right.
-    l_slope = np.average(lm)
-    r_slope = np.average(rm)
+        # Take the average slope and average center so we have single slope and
+        # center values for left and right.
+        l_slope = np.average(lm)
+        r_slope = np.average(rm)
 
-    l_center = np.average(lc, axis=0)
-    r_center = np.average(rc, axis=0)
+        l_center = np.average(lc, axis=0)
+        r_center = np.average(rc, axis=0)
 
-    if log:
-        log.debug('r/l slope={0}/{1}'.format(l_slope, r_slope))
-        log.debug('r/l center={0}/{1}'.format(l_center, r_center))
+        if log:
+            log.debug('r/l slope={0}/{1}'.format(l_slope, r_slope))
+            log.debug('r/l center={0}/{1}'.format(l_center, r_center))
 
-    # Start with the standard slope-intercept line formula:
-    # y = mx + b
-    # Ignore the y-intercept value (b).
-    # (y - y') = m(x - x')
-    # (y - y') / m = x - x'
-    # x' = x - ((y - y') / m)
+        # Start with the standard slope-intercept line formula:
+        # y = mx + b
+        # Ignore the y-intercept value (b).
+        # (y - y') = m(x - x')
+        # (y - y') / m = x - x'
+        # x' = x - ((y - y') / m)
 
-    # Use the center and slope calculated above as our (x, y) and m values,
-    # respectively.
-    # For y' we'll use the bottom of the image for one point and the mid-point
-    # of the image for our other point.
-    imshape = img.shape  # 0 == y, 1 == x
-    y1 = int(imshape[0])
-    y2 = int(0.6 * imshape[0])
+        # Use the center and slope calculated above as our (x, y) and m values,
+        # respectively.
+        # For y' we'll use the bottom of the image for one point and the mid-point
+        # of the image for our other point.
+        imshape = img.shape  # 0 == y, 1 == x
+        y1 = int(imshape[0])
+        y2 = int(0.6 * imshape[0])
 
-    if len(lc) > 0:
-        x1 = int(l_center[0] - ((l_center[1] - y1) / l_slope))
-        x2 = int(l_center[0] - ((l_center[1] - y2) / l_slope))
-        cv2.line(img, (x1, y1), (x2, y2), color, thickness)
+        if len(lc) > 0:
+            x1 = int(l_center[0] - ((l_center[1] - y1) / l_slope))
+            x2 = int(l_center[0] - ((l_center[1] - y2) / l_slope))
+            cv2.line(img, (x1, y1), (x2, y2), color, thickness)
 
-    if len(rc) > 0:
-        x1 = int(r_center[0] - ((r_center[1] - y1) / r_slope))
-        x2 = int(r_center[0] - ((r_center[1] - y2) / r_slope))
-        cv2.line(img, (x1, y1), (x2, y2), color, thickness)
-
-#    for line in lines:
-#        for x1, y1, x2, y2 in line:
-#            cv2.line(img, (x1, y1), (x2, y2), color, thickness)
+        if len(rc) > 0:
+            x1 = int(r_center[0] - ((r_center[1] - y1) / r_slope))
+            x2 = int(r_center[0] - ((r_center[1] - y2) / r_slope))
+            cv2.line(img, (x1, y1), (x2, y2), color, thickness)
 
 
 def draw_curves(img, lines, color=[255, 0, 0], thickness=2, log=None):
@@ -669,16 +672,16 @@ def main(name):
     # for example, call as plt.imshow(gray, cmap='gray')
 
     # Run all test images through our image pipeline.
-#    image_files = [os.path.join(image_dir, x) for x in os.listdir(image_dir)]
-#    process_image_files(image_files, output_image_dir, log)
+    image_files = [os.path.join(image_dir, x) for x in os.listdir(image_dir)]
+    process_image_files(image_files, output_image_dir, log)
 
     # Test lane finding for video.
 #    white_output = process_video_file(video_dir, 'solidWhiteRight.mp4',
 #                                      output_video_dir, log)
 #    yellow_output = process_video_file(video_dir, 'solidYellowLeft.mp4',
 #                                       output_video_dir, log)
-    challenge_output = process_video_file(video_dir, 'challenge.mp4',
-                                          output_video_dir, log)
+#    challenge_output = process_video_file(video_dir, 'challenge.mp4',
+#                                          output_video_dir, log)
 
     # Close the log file.
     for handler in log.handlers[:]:
