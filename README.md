@@ -15,12 +15,12 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image0]: test_images/solidWhiteRight.jpg "Original Image"
-[image1]: ./test_images_output/solidWhiteRight_1Gray.jpg "Grayscale"
-[image2]: ./test_images_output/solidWhiteRight_2Blur.jpg "Blurred Grayscale"
-[image3]: ./test_images_output/solidWhiteRight_3CannyEdges.jpg "Canny Edges"
-[image4]: ./test_images_output/solidWhiteRight_4MaskedCannyEdges.jpg "Masked Canny Edges"
-[image5]: ./test_images_output/solidWhiteRight_5HoughLines.jpg "Hough Lines"
-[image6]: ./test_images_output/solidWhiteRight_LaneLines.jpg "Lane Lines"
+[image1]: test_images_output/solidWhiteRight_1Gray.jpg "Grayscale"
+[image2]: test_images_output/solidWhiteRight_2Blur.jpg "Blurred Grayscale"
+[image3]: test_images_output/solidWhiteRight_3CannyEdges.jpg "Canny Edges"
+[image4]: test_images_output/solidWhiteRight_4MaskedCannyEdges.jpg "Masked Canny Edges"
+[image5]: test_images_output/solidWhiteRight_5HoughLines.jpg "Hough Lines"
+[image6]: test_images_output/solidWhiteRight_LaneLines.jpg "Lane Lines"
 
 ---
 
@@ -31,10 +31,10 @@ The goals / steps of this project are the following:
 My image pipeline consisted of 5 major steps.
 
 Original image:
-![][image0]
+![alt text][image0]
 
 1. Convert the original color image to grayscale.
-![][image1]
+![alt text][image1]
 
 1. Apply a Gaussian blur to the grayscale image. A simple Gaussian blur is included in the OpenCV Canny edge detection function but the caller does not have control over the details. So apply a Gaussian blur outside the Canny edge detection function. This allows us to control the kernel size and try different values to see which may work best.
 ![alt text][image2]
