@@ -650,7 +650,8 @@ def process_video_file(input_dir, input_file, output_dir, log=None):
 
 def main(name):
 
-    process_video = False
+    process_images = False
+    process_video = True
 
     print('Name: {}'.format(name))
     _, tail = os.path.split(name)
@@ -676,15 +677,16 @@ def main(name):
     # for example, call as plt.imshow(gray, cmap='gray')
 
     # Run all test images through our image pipeline.
-    image_files = [os.path.join(image_dir, x) for x in os.listdir(image_dir)]
-    process_image_files(image_files, output_image_dir, log)
+    if process_images:
+        image_files = [os.path.join(image_dir, x) for x in os.listdir(image_dir)]
+        process_image_files(image_files, output_image_dir, log)
 
     # Test lane finding for video.
     if process_video:
         white_output = process_video_file(video_dir, 'solidWhiteRight.mp4',
                                           output_video_dir, log)
-        # yellow_output = process_video_file(video_dir, 'solidYellowLeft.mp4',
-        #                                    output_video_dir, log)
+        yellow_output = process_video_file(video_dir, 'solidYellowLeft.mp4',
+                                           output_video_dir, log)
         # challenge_output = process_video_file(video_dir, 'challenge.mp4',
         #                                       output_video_dir, log)
 
