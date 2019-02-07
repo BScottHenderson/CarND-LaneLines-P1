@@ -32,8 +32,8 @@ def init(log_file_base='LogFile', logging_level=logging.INFO):
     Set up a log file object.
 
     Args:
-        log_file_base (str): Base log file name (date will be appended).
-        log_level (Level): Log message level
+        log_file_base (str):    Base log file name (date will be appended).
+        log_level (Level):      Log message level
 
     Returns:
         Logger: Object to be used for logging
@@ -58,10 +58,10 @@ def setup_logger(log_dir=None,
     Setup a logger.
 
     Args:
-        log_dir (str): Log file directory
-        log_file (str): Log file name
+        log_dir (str):          Log file directory
+        log_file (str):         Log file name
         log_format (Formatter): Log file message format
-        log_level (Level): Log message level
+        log_level (Level):      Log message level
 
     Returns:
         Logger: Object to be used for logging
@@ -90,7 +90,7 @@ def load_image(image_file, log=None):
     Load an image.
 
     Args:
-        image_file (str): Image file name
+        image_file (str):   Image file name
 
     Returns:
         image: The loaded image object.
@@ -125,8 +125,8 @@ def gaussian_blur(img, kernel_size):
     Applies a Gaussian Noise kernel
 
     Args:
-        img (image): Blur this image
-        kernel_size (int): Use this kernel size for blurring the image.
+        img (image):        Blur this image
+        kernel_size (int):  Use this kernel size for blurring the image.
 
     Returns:
         image: The blurred image.
@@ -139,9 +139,9 @@ def canny(img, low_threshold, high_threshold):
     Applies the Canny transform
 
     Args:
-        img (image): Transform this image
-        low_threshold (int): Canny low threshold
-        high_threshold (int): Canny high threshold
+        img (image):            Transform this image
+        low_threshold (int):    Canny low threshold
+        high_threshold (int):   Canny high threshold
 
         If an edge pixel's gradient value is:
             > high_threshold
@@ -168,19 +168,19 @@ def mask_polygon(img, top, delta_top, delta_bottom):
     that can be used to mask the image for lane line detection.
 
     Args:
-        img (image): The image to be masked (we need this only for shape).
-        top (int): The top of the mask polygon.
-        delta_top (int): Half the width of the top of the mask polygon.
-        delta_bottom (int): Half the width of the botto of the mask polygon.
+        img (image):        The image to be masked (we need this only for shape).
+        top (int):          The top of the mask polygon.
+        delta_top (int):    Half of the width of the top of the mask polygon.
+        delta_bottom (int): Half of the width of the bottom of the mask polygon.
 
     Returns:
         numpy array of vertices: A set of four vertices describing a quadrilateral.
     """
     imshape = img.shape  # 0 == y, 1 == x
-    lower_left = (delta_bottom, imshape[0])
-    upper_left = (imshape[1] / 2 - delta_top, top)
+    lower_left  = (delta_bottom,               imshape[0])
+    upper_left  = (imshape[1] / 2 - delta_top, top)
     upper_right = (imshape[1] / 2 + delta_top, top)
-    lower_right = (imshape[1] - delta_bottom, imshape[0])
+    lower_right = (imshape[1] - delta_bottom,  imshape[0])
     vertices = np.array([[lower_left, upper_left, upper_right, lower_right]],
                         dtype=np.int32)
     return vertices
@@ -195,7 +195,7 @@ def region_of_interest(img, vertices):
     `vertices` should be a numpy array of integer points.
 
     Args:
-        img (image): Mask this image
+        img (image):                        Mask this image
         vertices (numpy array of integers): A polygon to use for the mask
 
     Returns:
@@ -204,7 +204,7 @@ def region_of_interest(img, vertices):
     # Define a blank mask to start with
     mask = np.zeros_like(img)
 
-    # Defini a 3 channel or 1 channel color to fill the mask with depending
+    # Define a 3 channel or 1 channel color to fill the mask with depending
     # on the input image
     if len(img.shape) > 2:
         channel_count = img.shape[2]  # i.e. 3 or 4 depending on your image
@@ -226,10 +226,10 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap,
     Apply the Hough transform
 
     Args:
-        img (image): Transform this image - should be output of Canny transform
-        rho (int): Distance resolution in pixels of the Hough grid.
-        theta (int): Angular resolution in radians of the Hough grid.
-        threshold (int): Min. number of votes (intersections in a Hough grid cell)
+        img (image):        Transform this image - should be output of Canny transform
+        rho (int):          Distance resolution in pixels of the Hough grid.
+        theta (int):        Angular resolution in radians of the Hough grid.
+        threshold (int):    Min. number of votes (intersections in a Hough grid cell).
         min_line_len (int): Min. # of pixels making up a line.
         max_line_gap (int): Max. # of piexls between connectable line segments.
 
@@ -267,11 +267,12 @@ def draw_lines(img, lines, drawAllLines=False, color=[255, 0, 0], thickness=2,
     this function with the weighted_img() function below.
 
     Args:
-        img (image): Draw lines on this image
-        lines (array of lines as pairs of integer coords): Draw these lines
-        drawAllLines (bool): Draw all line segments or attempt to average?
-        color (RGB array of ints): Draw lines using this color.
-        thickness (int): Draw lines using this thickness
+        img (image):                Draw lines on this image
+        lines (array of lines as pairs of integer coords):
+                                    Draw these lines
+        drawAllLines (bool):        Draw all line segments or attempt to average?
+        color (RGB array of ints):  Draw lines using this color.
+        thickness (int):            Draw lines using this thickness
 
     Returns:
         None
@@ -297,14 +298,14 @@ def draw_lines(img, lines, drawAllLines=False, color=[255, 0, 0], thickness=2,
         rc = []
         for line in lines:
             for x1, y1, x2, y2 in line:
-                m = ((y2 - y1) / (x2 - x1))  # dy / dx
-                c = [(x2 + x1) / 2, (y2 + y1) / 2]
+                m = ((y2 - y1) / (x2 - x1))         # slope (dy / dx)
+                c = [(x2 + x1) / 2, (y2 + y1) / 2]  # center
                 if log:
                     log.debug('slope: {0}'.format(m))
-                if -epsilon < m and m < 0.:
+                if -epsilon < m and m < 0.:     # negative slope == left
                     lm.append(m)
                     lc.append(c)
-                elif 0. < m and m < epsilon:
+                elif 0. < m and m < epsilon:    # positive slope == right
                     rm.append(m)
                     rc.append(c)
 
@@ -335,11 +336,13 @@ def draw_lines(img, lines, drawAllLines=False, color=[255, 0, 0], thickness=2,
         y1 = int(imshape[0])
         y2 = int(0.6 * imshape[0])
 
+        # Left lane line
         if len(lc) > 0:
             x1 = int(l_center[0] - ((l_center[1] - y1) / l_slope))
             x2 = int(l_center[0] - ((l_center[1] - y2) / l_slope))
             cv2.line(img, (x1, y1), (x2, y2), color, thickness)
 
+        # Right lane line
         if len(rc) > 0:
             x1 = int(r_center[0] - ((r_center[1] - y1) / r_slope))
             x2 = int(r_center[0] - ((r_center[1] - y2) / r_slope))
@@ -365,10 +368,11 @@ def draw_curves(img, lines, color=[255, 0, 0], thickness=2, log=None):
     this function with the weighted_img() function below.
 
     Args:
-        img (image): Draw lines on this image
-        lines (array of lines as pairs of integer coords): Draw these lines
-        color (RGB array of ints): Draw lines using this color.
-        thickness (int): Draw lines using this thickness
+        img (image):                Draw lines on this image
+        lines (array of lines as pairs of integer coords):
+                                    Draw these lines
+        color (RGB array of ints):  Draw lines using this color.
+        thickness (int):            Draw lines using this thickness
 
     Returns:
         None
@@ -382,13 +386,13 @@ def draw_curves(img, lines, color=[255, 0, 0], thickness=2, log=None):
     right_y = []
     for line in lines:
         for x1, y1, x2, y2 in line:
-            m = ((y2 - y1) / (x2 - x1))  # dy / dx
+            m = ((y2 - y1) / (x2 - x1))  # slope (dy / dx)
             if log:
                 log.debug('slope: {0}'.format(m))
-            if -epsilon < m and m < 0.:
+            if -epsilon < m and m < 0.:     # Left lane line
                 left_x.extend([x1, x2])
                 left_y.extend([y1, y2])
-            elif 0. < m and m < epsilon:
+            elif 0. < m and m < epsilon:    # Right lane line
                 right_x.extend([x1, x2])
                 right_y.extend([y1, y2])
 
@@ -409,15 +413,15 @@ def draw_polylines(img, x, y, color=[255, 0, 0], thickness=2, degree=3,
     a curve.
 
     Args:
-        img (image): Draw lines on this image
-        x (list of int): x coordinates of points
-        y (list of int): y coordinates of points
-        color (RGB array of ints): Draw lines using this color.
-        thickness (int): Draw lines using this thickness
+        img (image):                Draw lines on this image
+        x (list of int):            x coordinates of points
+        y (list of int):            y coordinates of points
+        color (RGB array of ints):  Draw lines using this color.
+        thickness (int):            Draw lines using this thickness
     """
-    # Fit a 3 degree polynomial.
-    z = np.polyfit(x, y, degree)
-    f = np.poly1d(z)
+    # Fit a polynomial of the specified degree.
+    z = np.polyfit(x, y, degree)    # coefficients
+    f = np.poly1d(z)                # function
 
     # Set the list of x values. Evenly space x values between the first
     # and last points in our input values. Bookend these values with a
@@ -450,8 +454,8 @@ def solve_for_x(poly_coeffs, y):
         f(x) - y = 0
 
     Args:
-        poly_coeffs (list of float): Polygon coefficients.
-        y: Find x such that f(x) = y
+        poly_coeffs (list of float):    Polygon coefficients.
+        y:                              Find x such that f(x) = y
 
     Returns:
         The root of the polygon at y.
@@ -473,11 +477,11 @@ def weighted_img(img, initial_img, α=0.8, β=1., γ=0.):
     NOTE: initial_img and img must be the same shape!
 
     Args:
-        img (image): Result of Hough transform - an image with lines drawn.
-        initial_img (image): The original image before any processing.
-        α (float): Weight for initial image.
-        β (float): Weight for Hough transform line image.
-        γ (float): Adjustment factor (brightness?)
+        img (image):            Result of Hough transform - an image with lines drawn.
+        initial_img (image):    The original image before any processing.
+        α (float):              Weight for initial image.
+        β (float):              Weight for Hough transform line image.
+        γ (float):              Adjustment factor (brightness?)
 
     Returns:
         image: A combined (weighted) image.
@@ -492,28 +496,28 @@ def find_lane_lines(img, output_dir=None, output_base=None, output_ext=None,
     in an image.
 
     Args:
-        img (image): Find lines in this image
-        output_dir (str): Output directory for intermediate image files.
-        output_base (str): Base filename for intermediate images files.
-        output_ext (str): Extension / file type for intermediate images files.
+        img (image):        Find lines in this image
+        output_dir (str):   Output directory for intermediate image files.
+        output_base (str):  Base filename for intermediate image files.
+        output_ext (str):   Extension / file type for intermediate image files.
 
     Returns:
         None
     """
     kernel_size = 5             # kernel size for Gaussian blur
     # Canny edge detection:
-    canny_low_threshold = 50    # low threshold for Canny edge detection
+    canny_low_threshold  = 50   # low threshold for Canny edge detection
     canny_high_threshold = 150  # high threshold for Canny edge detection
     # Masking:
-    mask_top = 315          # top for the mask polygon
-    mask_delta_top = 10     # half of the top width of the mask polygon
-    mask_delta_bottom = 35  # half of the bottom width of the mask polygon
+    mask_top          = 315     # top for the mask polygon
+    mask_delta_top    = 10      # half of the top width of the mask polygon
+    mask_delta_bottom = 35      # half of the bottom width of the mask polygon
     # Hough transform:
-    rho = 2               # distance resolution (pixels) of the Hough grid
-    theta = np.pi / 180   # angular resolution (radians) of the Hough grid
-    hough_threshold = 15  # min. number of votes for a Hough grid cell
-    min_line_length = 40  # min number of pixels making up a line
-    max_line_gap = 20     # max gap (pixels) between connectable line segments
+    rho   = 2                   # Hough grid: distance resolution (pixels)
+    theta = np.pi / 180         # Hough grid: angular resolution (radians)
+    hough_threshold = 15        # min. number of votes for a Hough grid cell
+    min_line_length = 80        # min number of pixels making up a line
+    max_line_gap    = 40        # max gap (pixels) between connectable line segments
 
     # Convert the image to gray scale.
     gray = grayscale(img)
@@ -558,8 +562,8 @@ def process_image_files(image_files, output_dir, log=None):
     Find lane lines in each image in a given list.
 
     Args:
-        image_files (list of str): List of image file names.
-        output_dir (str): Output directory for processed image files.
+        image_files (list of str):  List of image file names.
+        output_dir (str):           Output directory for processed image files.
 
     Returns:
         None
@@ -570,13 +574,12 @@ def process_image_files(image_files, output_dir, log=None):
         log.info('Processing {0} image files.'.format(image_count))
     else:
         print('Processing {0} image files.'.format(image_count))
-    fig = axes = None
     if image_count > 1:
-        fig, axes = plt.subplots(image_count, sharex=True,
-                                 figsize=(20, 10 * image_count))
+        _, axes = plt.subplots(image_count, sharex=True,
+                               figsize=(20, 10 * image_count))
     for i in range(image_count):
         image_file = image_files[i]
-        head, tail = os.path.split(image_file)
+        _, tail = os.path.split(image_file)
         output_base, output_ext = os.path.splitext(tail)
         output_ext = output_ext[1:]  # remove the initial '.'
 
@@ -610,13 +613,13 @@ def process_video_file(input_dir, input_file, output_dir, log=None):
     Save the results to a new video file.
 
     Args:
-        input_dir (str): Look for the input file here.
-        input_file (str): Process this video file.
-        output_dir (str): Write the modified video file here.
+        input_dir (str):    Look for the input file here.
+        input_file (str):   Process this video file.
+        output_dir (str):   Write the modified video file here.
 
     Returns:
         str: The name fo the file containing the result of applying lane
-            lines to the input video.
+                lines to the input video.
 
     To speed up the testing process you may want to try your pipeline on a
     shorter subclip of the video. To do so add
@@ -648,9 +651,11 @@ def process_video_file(input_dir, input_file, output_dir, log=None):
 
 def main(name):
 
+    process_video = False
+
     print('Name: {}'.format(name))
-    head, tail = os.path.split(name)
-    log_file_base, ext = os.path.splitext(tail)
+    _, tail = os.path.split(name)
+    log_file_base, _ = os.path.splitext(tail)
 
     image_dir = 'test_images'
     output_image_dir = 'test_images_output'
@@ -676,17 +681,19 @@ def main(name):
     process_image_files(image_files, output_image_dir, log)
 
     # Test lane finding for video.
-#    white_output = process_video_file(video_dir, 'solidWhiteRight.mp4',
-#                                      output_video_dir, log)
-#    yellow_output = process_video_file(video_dir, 'solidYellowLeft.mp4',
-#                                       output_video_dir, log)
-#    challenge_output = process_video_file(video_dir, 'challenge.mp4',
-#                                          output_video_dir, log)
+    if process_video:
+        white_output = process_video_file(video_dir, 'solidWhiteRight.mp4',
+                                          output_video_dir, log)
+        # yellow_output = process_video_file(video_dir, 'solidYellowLeft.mp4',
+        #                                    output_video_dir, log)
+        # challenge_output = process_video_file(video_dir, 'challenge.mp4',
+        #                                       output_video_dir, log)
 
     # Close the log file.
     for handler in log.handlers[:]:
         handler.close()
         log.removeHandler(handler)
+
 
 if __name__ == '__main__':
     main(*sys.argv)
