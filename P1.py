@@ -575,8 +575,7 @@ def process_image_files(image_files, output_dir, log=None):
     else:
         print('Processing {0} image files.'.format(image_count))
     if image_count > 1:
-        _, axes = plt.subplots(image_count, sharex=True,
-                               figsize=(20, 10 * image_count))
+        fig = plt.figure(figsize=(14, 8))
     for i in range(image_count):
         image_file = image_files[i]
         _, tail = os.path.split(image_file)
@@ -591,9 +590,11 @@ def process_image_files(image_files, output_dir, log=None):
 
         # Display the lane lines image.
         if image_count > 1:
-            axes[i].imshow(combo)
+            fig.add_subplot(image_count // 2, 2, i+1)
+            plt.imshow(combo, extent=(0, img.shape[1], 0, img.shape[0]))
         else:
             plt.imshow(combo)
+            plt.show()
 
         # Save the lane lines image to a file.
         output_file = output_base + '_LaneLines.' + output_ext
@@ -602,9 +603,7 @@ def process_image_files(image_files, output_dir, log=None):
 
         # Cleanup
         del img
-
-        # Next image file
-        ++i
+    plt.show()
 
 
 def process_video_file(input_dir, input_file, output_dir, log=None):
