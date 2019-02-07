@@ -14,7 +14,7 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image0]: ./test_images/solidWhiteRight.jpg "Original Image"
+[image0]: test_images/solidWhiteRight.jpg "Original Image"
 [image1]: ./test_images_output/solidWhiteRight_1Gray.jpg "Grayscale"
 [image2]: ./test_images_output/solidWhiteRight_2Blur.jpg "Blurred Grayscale"
 [image3]: ./test_images_output/solidWhiteRight_3CannyEdges.jpg "Canny Edges"
@@ -31,7 +31,7 @@ The goals / steps of this project are the following:
 My image pipeline consisted of 5 major steps.
 
 Original image:
-![alt text][image0]
+![][image0]
 
 1. Convert the original color image to grayscale.
 ![alt text][image1]
