@@ -34,7 +34,7 @@ Original image:
 ![][image0]
 
 1. Convert the original color image to grayscale.
-![alt text][image1]
+![][image1]
 
 1. Apply a Gaussian blur to the grayscale image. A simple Gaussian blur is included in the OpenCV Canny edge detection function but the caller does not have control over the details. So apply a Gaussian blur outside the Canny edge detection function. This allows us to control the kernel size and try different values to see which may work best.
 ![alt text][image2]
