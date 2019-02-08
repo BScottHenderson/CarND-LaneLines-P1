@@ -15,6 +15,8 @@ import sys
 import logging
 import datetime
 
+import click
+
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -647,15 +649,17 @@ def process_video_file(input_dir, input_file, output_dir, log=None):
     # Return the output file name.
     return lane_lines_output
 
+@click.command()
+@click.option('--images', '-i', is_flag=True)
+@click.option('--video', '-v', is_flag=True)
+def main(images, video):
 
-def main(name):
+    print('Name: {}'.format(__file__))
+    log_file_base, _ = os.path.splitext(os.path.basename(__file__))
 
-    process_images = False
-    process_video = True
-
-    print('Name: {}'.format(name))
-    _, tail = os.path.split(name)
-    log_file_base, _ = os.path.splitext(tail)
+    if not images and not video:
+        print('At least one flag must be specified. For help: python {} --help'.format(__file__))
+        return
 
     image_dir = 'test_images'
     output_image_dir = 'test_images_output'
@@ -677,12 +681,12 @@ def main(name):
     # for example, call as plt.imshow(gray, cmap='gray')
 
     # Run all test images through our image pipeline.
-    if process_images:
+    if images:
         image_files = [os.path.join(image_dir, x) for x in os.listdir(image_dir)]
         process_image_files(image_files, output_image_dir, log)
 
     # Test lane finding for video.
-    if process_video:
+    if video:
         white_output = process_video_file(video_dir, 'solidWhiteRight.mp4',
                                           output_video_dir, log)
         yellow_output = process_video_file(video_dir, 'solidYellowLeft.mp4',
@@ -697,4 +701,4 @@ def main(name):
 
 
 if __name__ == '__main__':
-    main(*sys.argv)
+    main()
