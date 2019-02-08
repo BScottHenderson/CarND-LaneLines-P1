@@ -506,7 +506,7 @@ def find_lane_lines(img, output_dir=None, output_base=None, output_ext=None,
     Returns:
         None
     """
-    kernel_size = 5             # kernel size for Gaussian blur
+    kernel_size = 3             # kernel size for Gaussian blur
     # Canny edge detection:
     canny_low_threshold  = 50   # low threshold for Canny edge detection
     canny_high_threshold = 150  # high threshold for Canny edge detection
@@ -518,8 +518,8 @@ def find_lane_lines(img, output_dir=None, output_base=None, output_ext=None,
     rho   = 2                   # Hough grid: distance resolution (pixels)
     theta = np.pi / 180         # Hough grid: angular resolution (radians)
     hough_threshold = 15        # min. number of votes for a Hough grid cell
-    min_line_length = 80        # min number of pixels making up a line
-    max_line_gap    = 40        # max gap (pixels) between connectable line segments
+    min_line_length = 95        # min number of pixels making up a line
+    max_line_gap    = 70        # max gap (pixels) between connectable line segments
 
     # Convert the image to gray scale.
     gray = grayscale(img)
@@ -649,6 +649,7 @@ def process_video_file(input_dir, input_file, output_dir, log=None):
     # Return the output file name.
     return lane_lines_output
 
+
 @click.command()
 @click.option('--images', '-i', is_flag=True)
 @click.option('--video', '-v', is_flag=True)
@@ -687,12 +688,9 @@ def main(images, video):
 
     # Test lane finding for video.
     if video:
-        white_output = process_video_file(video_dir, 'solidWhiteRight.mp4',
-                                          output_video_dir, log)
-        yellow_output = process_video_file(video_dir, 'solidYellowLeft.mp4',
-                                           output_video_dir, log)
-        # challenge_output = process_video_file(video_dir, 'challenge.mp4',
-        #                                       output_video_dir, log)
+        process_video_file(video_dir, 'solidWhiteRight.mp4', output_video_dir, log)
+        process_video_file(video_dir, 'solidYellowLeft.mp4', output_video_dir, log)
+        process_video_file(video_dir, 'challenge.mp4', output_video_dir, log)
 
     # Close the log file.
     for handler in log.handlers[:]:
