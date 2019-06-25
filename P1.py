@@ -7,7 +7,6 @@ Created on Tue Jun 12 06:56:49 2018
 Self-Driving Car Engineer Nanodegree
 
 Project: Finding Lane Lines on the Road
-
 """
 
 import os
@@ -35,10 +34,10 @@ def init(log_file_base='LogFile', logging_level=logging.INFO):
 
     Args:
         log_file_base (str):    Base log file name (date will be appended).
-        log_level (Level):      Log message level
+        log_level (Level):      Log message level.
 
     Returns:
-        Logger: Object to be used for logging
+        Logger: Object to be used for logging.
     """
     log_dir = 'logs'
     if not os.path.exists(log_dir):
@@ -66,7 +65,7 @@ def setup_logger(log_dir=None,
         log_level (Level):      Log message level
 
     Returns:
-        Logger: Object to be used for logging
+        Logger: Object to be used for logging.
     """
     # Get logger
     logger = logging.getLogger('')
@@ -111,7 +110,7 @@ def load_image(image_file, log=None):
 
 def grayscale(img):
     """
-    Applies the Grayscale transform
+    Applies the Grayscale transform.
     This will return an image with only one color channel
     but NOTE: to see the returned image as grayscale
     (assuming your grayscaled image is called 'gray')
@@ -127,7 +126,7 @@ def gaussian_blur(img, kernel_size):
     Applies a Gaussian Noise kernel
 
     Args:
-        img (image):        Blur this image
+        img (image):        Blur this image.
         kernel_size (int):  Use this kernel size for blurring the image.
 
     Returns:
@@ -141,9 +140,9 @@ def canny(img, low_threshold, high_threshold):
     Applies the Canny transform
 
     Args:
-        img (image):            Transform this image
-        low_threshold (int):    Canny low threshold
-        high_threshold (int):   Canny high threshold
+        img (image):            Transform this image.
+        low_threshold (int):    Canny low threshold.
+        high_threshold (int):   Canny high threshold.
 
         If an edge pixel's gradient value is:
             > high_threshold
@@ -154,7 +153,7 @@ def canny(img, low_threshold, high_threshold):
                 it will be suppressed
 
         For a grayscale image we have 8 color bits == 2^8 == 256 so the
-        thresholds in this case would be in [1, 256]
+        thresholds in this case would be in [1, 256].
 
         Canny recommends a ratio of 1:2 or 1:3 for low-to-high threshold.
 
@@ -164,25 +163,28 @@ def canny(img, low_threshold, high_threshold):
     return cv2.Canny(img, low_threshold, high_threshold)
 
 
-def mask_polygon(img, top, delta_top, delta_bottom):
+def mask_polygon(img, top, bottom, delta_top, delta_bottom):
     """
     Given an image, return a list of vertices describing a quadrilateral
-    that can be used to mask the image for lane line detection.
+    that can be used to mask the image for lane line detection. Assume that
+    the vehicle is centered in the lane.
 
     Args:
         img (image):        The image to be masked (we need this only for shape).
         top (int):          The top of the mask polygon.
+        bottom (int):       The bottom of the mask polygon.
         delta_top (int):    Half of the width of the top of the mask polygon.
         delta_bottom (int): Half of the width of the bottom of the mask polygon.
 
     Returns:
         numpy array of vertices: A set of four vertices describing a quadrilateral.
     """
-    imshape = img.shape  # 0 == y, 1 == x
-    lower_left  = (delta_bottom,               imshape[0])
-    upper_left  = (imshape[1] / 2 - delta_top, top)
-    upper_right = (imshape[1] / 2 + delta_top, top)
-    lower_right = (imshape[1] - delta_bottom,  imshape[0])
+    center_x = img.shape[1] / 2
+    max_y    = img.shape[0]
+    lower_left  = (center_x - delta_bottom, max_y - bottom)
+    upper_left  = (center_x - delta_top,    top)
+    upper_right = (center_x + delta_top,    top)
+    lower_right = (center_x + delta_bottom, max_y - bottom)
     vertices = np.array([[lower_left, upper_left, upper_right, lower_right]],
                         dtype=np.int32)
     return vertices
@@ -197,8 +199,8 @@ def region_of_interest(img, vertices):
     `vertices` should be a numpy array of integer points.
 
     Args:
-        img (image):                        Mask this image
-        vertices (numpy array of integers): A polygon to use for the mask
+        img (image):                        Mask this image.
+        vertices (numpy array of integers): A polygon to use for the mask.
 
     Returns:
         image: The masked image.
@@ -228,7 +230,7 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap,
     Apply the Hough transform
 
     Args:
-        img (image):        Transform this image - should be output of Canny transform
+        img (image):        Transform this image - should be output of Canny transform.
         rho (int):          Distance resolution in pixels of the Hough grid.
         theta (int):        Angular resolution in radians of the Hough grid.
         threshold (int):    Min. number of votes (intersections in a Hough grid cell).
@@ -269,16 +271,20 @@ def draw_lines(img, lines, drawAllLines=False, color=[255, 0, 0], thickness=2,
     this function with the weighted_img() function below.
 
     Args:
-        img (image):                Draw lines on this image
+        img (image):                Draw lines on this image.
         lines (array of lines as pairs of integer coords):
-                                    Draw these lines
+                                    Draw these lines.
         drawAllLines (bool):        Draw all line segments or attempt to average?
         color (RGB array of ints):  Draw lines using this color.
-        thickness (int):            Draw lines using this thickness
+        thickness (int):            Draw lines using this thickness.
 
     Returns:
         None
     """
+    # Make sure we have something to draw.
+    if lines is None:
+        return
+
     if drawAllLines:
         for line in lines:
             for x1, y1, x2, y2 in line:
@@ -370,11 +376,11 @@ def draw_curves(img, lines, color=[255, 0, 0], thickness=2, log=None):
     this function with the weighted_img() function below.
 
     Args:
-        img (image):                Draw lines on this image
+        img (image):                Draw lines on this image.
         lines (array of lines as pairs of integer coords):
-                                    Draw these lines
+                                    Draw these lines.
         color (RGB array of ints):  Draw lines using this color.
-        thickness (int):            Draw lines using this thickness
+        thickness (int):            Draw lines using this thickness.
 
     Returns:
         None
@@ -415,11 +421,15 @@ def draw_polylines(img, x, y, color=[255, 0, 0], thickness=2, degree=3,
     a curve.
 
     Args:
-        img (image):                Draw lines on this image
-        x (list of int):            x coordinates of points
-        y (list of int):            y coordinates of points
+        img (image):                Draw lines on this image.
+        x (list of int):            x coordinates of points.
+        y (list of int):            y coordinates of points.
         color (RGB array of ints):  Draw lines using this color.
-        thickness (int):            Draw lines using this thickness
+        thickness (int):            Draw lines using this thickness.
+        degree (int):               Fit a polynomial of this degree.
+
+    Returns:
+        None
     """
     # Fit a polynomial of the specified degree.
     z = np.polyfit(x, y, degree)    # coefficients
@@ -457,7 +467,7 @@ def solve_for_x(poly_coeffs, y):
 
     Args:
         poly_coeffs (list of float):    Polygon coefficients.
-        y:                              Find x such that f(x) = y
+        y:                              Find x such that f(x) = y.
 
     Returns:
         The root of the polygon at y.
@@ -465,6 +475,62 @@ def solve_for_x(poly_coeffs, y):
     pc = poly_coeffs.copy()
     pc[-1] -= y
     return np.real(np.roots(pc)[0])
+
+
+def draw_gridlines(img, grid_x, grid_y, color=[0, 128, 128], thickness=2,
+                   log=None):
+    """
+    Draw lines on an image using the specified list of points to generate
+    a curve.
+
+    Args:
+        img (image):                Draw lines on this image.
+        grid_x (int):               x resolution of grid.
+        grid_y ( int):              y resolution of grid.
+        color (RGB array of ints):  Draw lines using this color.
+        thickness (int):            Draw lines using this thickness.
+
+    Returns:
+        None
+    """
+    imshape = img.shape  # 0 == y, 1 == x
+
+    # Draw vertical lines.
+    for x in range(grid_x, imshape[1], grid_x):
+        cv2.line(img, (x, 0), (x, imshape[0]), color, thickness)
+
+    # Draw horizontal lines.
+    for y in range(grid_y, imshape[0], grid_y):
+        cv2.line(img, (0, y), (imshape[1], y), color, thickness)
+
+
+def draw_mask(img, mask_vertices, color=[0, 128, 128], thickness=2,
+              log=None):
+    """
+    Draw lines on an image using the specified list of points to generate
+    a curve.
+
+    Args:
+        img (image):                Draw lines on this image.
+        mask_vertices (numpy array of vertices):
+                                    A set of four vertices describing a quadrilateral.
+        color (RGB array of ints):  Draw lines using this color.
+        thickness (int):            Draw lines using this thickness.
+
+    Returns:
+        None
+    """
+    # Extract the four points for the quadrilateral.
+    ll = mask_vertices[0][0]
+    ul = mask_vertices[0][1]
+    ur = mask_vertices[0][2]
+    lr = mask_vertices[0][3]
+
+    # Draw four edges.
+    cv2.line(img, (ll[0], ll[1]), (ul[0], ul[1]), color, thickness) # ll -> ul
+    cv2.line(img, (ul[0], ul[1]), (ur[0], ur[1]), color, thickness) # ul -> ur
+    cv2.line(img, (ur[0], ur[1]), (lr[0], lr[1]), color, thickness) # ur -> lr
+    cv2.line(img, (lr[0], lr[1]), (ll[0], ll[1]), color, thickness) # lr -> ll
 
 
 # Python 3 has support for cool math symbols.
@@ -498,7 +564,7 @@ def find_lane_lines(img, output_dir=None, output_base=None, output_ext=None,
     in an image.
 
     Args:
-        img (image):        Find lines in this image
+        img (image):        Find lines in this image.
         output_dir (str):   Output directory for intermediate image files.
         output_base (str):  Base filename for intermediate image files.
         output_ext (str):   Extension / file type for intermediate image files.
@@ -511,9 +577,12 @@ def find_lane_lines(img, output_dir=None, output_base=None, output_ext=None,
     canny_low_threshold  = 50   # low threshold for Canny edge detection
     canny_high_threshold = 150  # high threshold for Canny edge detection
     # Masking:
-    mask_top          = 315     # top for the mask polygon
-    mask_delta_top    = 10      # half of the top width of the mask polygon
-    mask_delta_bottom = 35      # half of the bottom width of the mask polygon
+    imshape = img.shape  # 0 == y, 1 == x
+    mask_top          = int(imshape[0] * 0.625) # top for the mask polygon
+    mask_bottom       = int(imshape[0] * 0.083) # bottom for the mask polygon (remove the vehicle hood)
+    mask_delta_top    = int(imshape[1] * 0.070) # half of the top width of the mask polygon
+    mask_delta_bottom = int(imshape[1] * 0.328) # half of the bottom width of the mask polygon
+
     # Hough transform:
     rho   = 2                   # Hough grid: distance resolution (pixels)
     theta = np.pi / 180         # Hough grid: angular resolution (radians)
@@ -527,26 +596,44 @@ def find_lane_lines(img, output_dir=None, output_base=None, output_ext=None,
         output_file = output_base + '_1Gray.' + output_ext
         mpimg.imsave(os.path.join(output_dir, output_file), gray,
                      format=output_ext)
+
     # Apply a Gaussian blur.
     blur = gaussian_blur(gray, kernel_size)
     if output_dir:
         output_file = output_base + '_2Blur.' + output_ext
         mpimg.imsave(os.path.join(output_dir, output_file), blur,
                      format=output_ext)
+
     # Use Canny edge detection to find edges.
     edges = canny(blur, canny_low_threshold, canny_high_threshold)
     if output_dir:
         output_file = output_base + '_3CannyEdges.' + output_ext
         mpimg.imsave(os.path.join(output_dir, output_file), edges,
                      format=output_ext)
+
+        # Draw gridlines on the Canny image.
+        grid = np.copy(edges)
+        draw_gridlines(grid, 100, 100, color=[255,255,255], thickness=1)
+        output_file = output_base + '_3CannyEdges_Grid.' + output_ext
+        mpimg.imsave(os.path.join(output_dir, output_file), grid,
+                     format=output_ext)
+
+        # Draw the maks on the Canny image.
+        mask_vertices = mask_polygon(edges, mask_top, mask_bottom, mask_delta_top, mask_delta_bottom)
+        mask = np.copy(edges)
+        draw_mask(mask, mask_vertices, color=[255,255,255], thickness=1)
+        output_file = output_base + '_3CannyEdges_Mask.' + output_ext
+        mpimg.imsave(os.path.join(output_dir, output_file), mask,
+                     format=output_ext)
+
     # Mask edges that we believe are outside the lane area.
-    mask_vertices = mask_polygon(edges, mask_top, mask_delta_top,
-                                 mask_delta_bottom)
+    mask_vertices = mask_polygon(edges, mask_top, mask_bottom, mask_delta_top, mask_delta_bottom)
     masked_image = region_of_interest(edges, mask_vertices)
     if output_dir:
         output_file = output_base + '_4MaskedCannyEdges.' + output_ext
         mpimg.imsave(os.path.join(output_dir, output_file), masked_image,
                      format=output_ext)
+
     # Use Hough transform to combine Canny edges into lines.
     lines_image = hough_lines(masked_image, rho, theta, hough_threshold,
                               min_line_length, max_line_gap, log)
@@ -554,6 +641,7 @@ def find_lane_lines(img, output_dir=None, output_base=None, output_ext=None,
         output_file = output_base + '_5HoughLines.' + output_ext
         mpimg.imsave(os.path.join(output_dir, output_file), lines_image,
                      format=output_ext)
+
     # Draw the Hough lines on the original image
     combo = weighted_img(lines_image, img)
     return combo
@@ -596,7 +684,6 @@ def process_image_files(image_files, output_dir, log=None):
             plt.imshow(combo, extent=(0, img.shape[1], 0, img.shape[0]))
         else:
             plt.imshow(combo)
-            plt.show()
 
         # Save the lane lines image to a file.
         output_file = output_base + '_LaneLines.' + output_ext
@@ -619,7 +706,7 @@ def process_video_file(input_dir, input_file, output_dir, log=None):
         output_dir (str):   Write the modified video file here.
 
     Returns:
-        str: The name fo the file containing the result of applying lane
+        str: The name of the file containing the result of applying lane
                 lines to the input video.
 
     To speed up the testing process you may want to try your pipeline on a
@@ -650,26 +737,70 @@ def process_video_file(input_dir, input_file, output_dir, log=None):
     return lane_lines_output
 
 
+def debug_video_file(input_dir, input_file, output_dir, log=None):
+    """
+    Apply the 'find_lane_lines' function to a few frames in a given video file.
+    Save the intermediate image results for debugging.
+
+    Args:
+        input_dir (str):    Look for the input file here.
+        input_file (str):   Process this video file.
+        output_dir (str):   Write debug images here.
+
+    Returns:
+        str: The name fo the file containing the result of applying lane
+                lines to the input video.
+
+    To speed up the testing process you may want to try your pipeline on a
+    shorter subclip of the video. To do so add
+
+        .subclip(start_second,end_second)
+
+    to the end of the line below, where start_second and end_second are integer
+    values representing the start and end of the subclip.
+    """
+    # Open the video file.
+    video_clip = VideoFileClip(os.path.join(input_dir, input_file))
+
+    # Write the first frame to a file.
+    video_clip.save_frame(os.path.join(output_dir, 'frame1.jpg'))
+
+    # Write processed images to a subdirectory to avoid confusion.
+    output_image_dir = os.path.join(output_dir, 'debug_images_output')
+    if not os.path.exists(output_image_dir):
+        os.makedirs(output_image_dir)
+
+    # Run the 'find_lane_lines' function on the saved video frame file(s).
+    image_files = [os.path.join(output_dir, x) for x in os.listdir(output_dir) if x.endswith('.jpg')]
+    process_image_files(image_files, output_image_dir, log)
+
+    # Cleanup
+    video_clip.reader.close()
+    video_clip.audio.reader.close_proc()
+    del video_clip
+
+
 @click.command()
 @click.option('--images', '-i', is_flag=True)
 @click.option('--video', '-v', is_flag=True)
-def main(images, video):
+@click.option('--debug', '-d', is_flag=True)
+def main(images=None, video=None, debug=None):
 
     print('Name: {}'.format(__file__))
     log_file_base, _ = os.path.splitext(os.path.basename(__file__))
 
-    if not images and not video:
+    if not images and not video and not debug:
         print('At least one flag must be specified. For help: python {} --help'.format(__file__))
         return
 
     image_dir = 'test_images'
     output_image_dir = 'test_images_output'
-    if not os.path.exists(output_image_dir):
+    if images and not os.path.exists(output_image_dir):
         os.makedirs(output_image_dir)
 
     video_dir = 'test_videos'
     output_video_dir = 'test_video_output'
-    if not os.path.exists(output_video_dir):
+    if video and not os.path.exists(output_video_dir):
         os.makedirs(output_video_dir)
 
     # Init
@@ -691,6 +822,13 @@ def main(images, video):
         process_video_file(video_dir, 'solidWhiteRight.mp4', output_video_dir, log)
         process_video_file(video_dir, 'solidYellowLeft.mp4', output_video_dir, log)
         process_video_file(video_dir, 'challenge.mp4', output_video_dir, log)
+
+    # Debug video processing.
+    if debug:
+        debug_video_dir = 'test_video_debug'
+        if not os.path.exists(debug_video_dir):
+            os.makedirs(debug_video_dir)
+        debug_video_file(video_dir, 'challenge.mp4', debug_video_dir, log)
 
     # Close the log file.
     for handler in log.handlers[:]:
